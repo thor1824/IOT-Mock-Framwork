@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ConsolePublisher;
 using IOT_mock.Connector;
+using IOT_mock.IotDevices.Models;
 using IOT_mock.Sensors;
 using IOT_mock.Sensors.Models;
 
@@ -91,10 +91,5 @@ namespace IOT_mock.IotDevices.Impl
             StopAllSensors();
             CommunicationClient.Disconnect();
         }
-    }
-
-    public class ClientResponse {
-        public Guid Id { get; set; }
-        public SenorResponse Body { get; set; }
     }
 }
