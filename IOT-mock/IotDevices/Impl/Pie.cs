@@ -1,51 +1,73 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using ConsolePublisher;
+using IOT_mock.Connector;
+using IOT_mock.Sensors;
+using IOT_mock.Sensors.Models;
 
-namespace IOT_mock
+namespace IOT_mock.IotDevices.Impl
 {
-    public class Pie
+    public class Pie : IIotDevice
     {
-        private readonly IList<ISensor> _sensors;
-        
+        public Guid Id { get; init; }
+        public IList<ISensor> Sensors { get; init; } = new List<ISensor>();
+        public ICommunicationClient CommunicationClient { get; init; }
+
         public void AddSenor(params ISensor[] sensors)
         {
             foreach (var sensor in sensors)
             {
-                _sensors.Add(sensor);    
+                Sensors.Add(sensor);    
             }
         }
 
         public IEnumerable<SensorConfiguration> GetSensorConfigurations()
         {
-            return _sensors.Select(sensor => sensor.Configuration);
+            return Sensors.Select(sensor => sensor.Configuration);
         }
         
         public SensorConfiguration GetSensorConfiguration(Guid id)
         {
-            return _sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id)?.Configuration;
+            return Sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id)?.Configuration;
         }
 
-        public void StartAllSenors(OnSensorDataRecorded<SenorResponse> sensorFetch)
+        public void StartAllSenors()
         {
-            foreach (var sensor in _sensors)
+            foreach (var sensor in Sensors)
             {
-                sensor.StartRecordingAsync(sensorFetch.Invoke);
+                Task.Run(() =>
+                {
+                    Console.WriteLine($"Sensor {sensor.Configuration.Id}, Is On");
+                    sensor.StartRecordingAsync(response =>
+                    {
+                        var clientResponse = new ClientResponse
+                        {
+                            Id = Id,
+                            Body = response
+                        };
+                        var json = JsonSerializer.Serialize(clientResponse);
+                        CommunicationClient.SendData(sensor.Configuration.Suffix, json);
+                    });
+                });
             }
         }
 
-        public void StartSenors(Guid id, OnSensorDataRecorded<SenorResponse> sensorFetch)
+        public void StartSenors(Guid id)
         {
-           var sensor = _sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id);
+           var sensor = Sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id);
 
-           sensor?.StartRecordingAsync(sensorFetch.Invoke);
+           sensor?.StartRecordingAsync(response =>
+           {
+               CommunicationClient.SendData("Test", response.Value);
+           });
         }
 
         public void StopAllSensors()
         {
-            foreach (var sensor in _sensors)
+            foreach (var sensor in Sensors)
             {
                 sensor.StopRecording();
             }
@@ -53,11 +75,26 @@ namespace IOT_mock
 
         public void StopSensors(Guid id)
         {
-            var sensor = _sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id);
+            var sensor = Sensors.FirstOrDefault(sensor => sensor.Configuration.Id == id);
 
             sensor?.StopRecording();
         }
+
+        public void StartDevice()
+        {
+            CommunicationClient.Connect();
+            StartAllSenors();
+        }
+
+        public void StopDevice()
+        {
+            StopAllSensors();
+            CommunicationClient.Disconnect();
+        }
     }
 
-    
+    public class ClientResponse {
+        public Guid Id { get; set; }
+        public SenorResponse Body { get; set; }
+    }
 }

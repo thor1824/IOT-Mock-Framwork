@@ -4,12 +4,13 @@ using IOT_mock.Connector;
 using IOT_mock.Sensors;
 using IOT_mock.Sensors.Models;
 
-namespace IOT_mock.IotDevices.Impl
+namespace IOT_mock.IotDevices
 {
     public interface IIotDevice
     {
         IList<ISensor> Sensors { get; init; }
-        IConnector Connector { get; init; }
+        ICommunicationClient CommunicationClient { get; init; }
+        Guid Id { get; init; }
         void AddSenor(params ISensor[] sensors);
         IEnumerable<SensorConfiguration> GetSensorConfigurations();
         SensorConfiguration GetSensorConfiguration(Guid id);

@@ -1,4 +1,4 @@
-﻿namespace IOT_mock.Connector
+﻿namespace IOT_mock.Connector.Models
 {
     public class ConnectorConfig
     {

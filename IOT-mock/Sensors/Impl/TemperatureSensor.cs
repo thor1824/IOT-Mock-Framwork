@@ -2,17 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ConsolePublisher;
+using IOT_mock.Sensors.Models;
 using MQTTnet;
 
-namespace IOT_mock
+namespace IOT_mock.Sensors.Impl
 {
-    public interface ISensor
-    {
-        SensorConfiguration Configuration { get; set; }
-        Task StartRecordingAsync(OnSensorDataRecorded<SenorResponse> action);
-        void StopRecording();
-    }
-
     public class TempSensor : ISensor
     {
         public SensorConfiguration Configuration { get; set; }
@@ -22,7 +16,7 @@ namespace IOT_mock
         private int incrementBuffer = 1;
         
         
-        public async Task StartRecordingAsync(OnSensorDataRecorded<SenorResponse> action)
+        public async Task StartRecordingAsync(OnSensorDataRecorded action)
         {
             isOn = true;
             var oldValue = startValue;
@@ -37,7 +31,9 @@ namespace IOT_mock
                 
                 action.Invoke(new SenorResponse {
                     SensorId = Configuration.Id,
-                    Value = "" + value
+                    Value = "" + value,
+                    MeasurementUnit = "temp/c",
+                    TimeStamp = DateTime.UtcNow
                 });
                 
                 Thread.Sleep(Configuration.RecordInterval);
@@ -48,53 +44,5 @@ namespace IOT_mock
         {
             isOn = false;
         }
-        
-        
-        
-        private static void SimulatePublish(string topicSuffix, double startValue, int incrementMax, CancellationToken token)
-        {
-            Console.WriteLine(topicSuffix + " Simulation Start");
-            var oldValue = startValue;
-            
-            while (/*!token.IsCancellationRequested*/ true)
-            {
-                Random rnd = new Random();
-                var modifier = 0.2 *(rnd.Next(-1 * incrementMax, 0) * rnd.NextDouble() + rnd.Next(0, incrementMax + 1) * rnd.NextDouble());
-                
-                var value = oldValue + modifier;
-                oldValue = value;
-                
-                var testMessage = new MqttApplicationMessageBuilder()
-                    .WithTopic($"iot-{topicSuffix}")
-                    .WithPayload($"{value}")
-                    .WithExactlyOnceQoS()
-                    .WithRetainFlag()
-                    .Build();
-
-
-                if (_client.IsConnected)
-                {
-                    Console.WriteLine($"publishing at {DateTime.UtcNow}");
-                    _client.PublishAsync(testMessage);
-                }
-                Thread.Sleep(2000);
-            }
-        }
-        
-        
-    }
-    
-    public class SenorResponse
-    {
-        public Guid SensorId { get; set; }
-        public string Value { get; set; }
-    }
-    
-
-    public class SensorConfiguration
-    {
-        
-        public Guid Id { get; set; }
-        public int RecordInterval  { get; set; }
     }
 }
