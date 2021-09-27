@@ -2,6 +2,7 @@
 using IOT_mock.Connector;
 using IOT_mock.Connector.Models;
 using IOT_mock.Connector.secret;
+using IOT_mock.IotDevices;
 using IOT_mock.IotDevices.Impl;
 using IOT_mock.Sensors.Impl;
 using IOT_mock.Sensors.Models;
@@ -13,7 +14,7 @@ namespace IOT_mock
         public static void Main(string[] args)
         {
             var deviceId = Guid.Parse("c6ac2002-3203-408c-b87b-b77a1de2f6ac");
-            var device = new Pie
+            IIotDevice device = new Pie
             {
                 Id = deviceId,
                 CommunicationClient = new MqttCommunicationClient

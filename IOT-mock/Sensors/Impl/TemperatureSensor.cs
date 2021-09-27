@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ConsolePublisher;
 using IOT_mock.Sensors.Models;
-using MQTTnet;
 
 namespace IOT_mock.Sensors.Impl
 {
