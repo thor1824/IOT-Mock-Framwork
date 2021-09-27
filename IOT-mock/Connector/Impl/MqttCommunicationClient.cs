@@ -3,6 +3,7 @@ using IOT_mock.Connector.Models;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
+using Newtonsoft.Json;
 
 namespace IOT_mock.Connector
 {
@@ -11,6 +12,7 @@ namespace IOT_mock.Connector
         private IMqttClient _client;
         private IMqttClientOptions _options;
         public ConnectorConfig Config { get; init; }
+        public OnSettingsChange OnSettingsChange { get; set; }
 
         public void Connect()
         {
@@ -29,6 +31,25 @@ namespace IOT_mock.Connector
                 .WithCredentials(Config.Username, Config.Password)
                 .WithCleanSession()
                 .Build();
+
+            _client.UseApplicationMessageReceivedHandler(e =>
+            {
+                
+                string topic = e.ApplicationMessage.Topic;
+
+                if (topic.Contains("settings-change")) 
+                {
+                    if (OnSettingsChange is null) 
+                    {
+                        return;
+                    }
+                    var rawData = e.ApplicationMessage.Payload;
+                    var rawDataString = System.Text.Encoding.UTF8.GetString(rawData);
+                    var data = JsonConvert.DeserializeObject<SettingsChange>(rawDataString);
+                    OnSettingsChange.Invoke(data);
+                }
+                
+            });
 
             _client.ConnectAsync(_options).Wait();
             /*
@@ -81,5 +102,8 @@ namespace IOT_mock.Connector
         {
             _client.DisconnectAsync().Wait();
         }
+
     }
+    public delegate void OnSettingsChange(SettingsChange changes);
 }
+

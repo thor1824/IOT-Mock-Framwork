@@ -8,5 +8,6 @@ namespace IOT_mock.Connector
         void SendData(string topicSuffix, string payload);
         void Disconnect();
         ConnectorConfig Config { get; init; }
+        OnSettingsChange OnSettingsChange { get; set; }
     }
 }

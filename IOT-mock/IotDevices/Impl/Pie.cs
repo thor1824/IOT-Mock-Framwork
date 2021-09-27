@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ConsolePublisher;
 using IOT_mock.Connector;
+using IOT_mock.Connector.Models;
 using IOT_mock.Sensors;
 using IOT_mock.Sensors.Models;
 
@@ -61,7 +62,13 @@ namespace IOT_mock.IotDevices.Impl
 
            sensor?.StartRecordingAsync(response =>
            {
-               CommunicationClient.SendData("Test", response.Value);
+               var clientResponse = new ClientResponse
+               {
+                   Id = Id,
+                   Body = response
+               };
+               var json = JsonSerializer.Serialize(clientResponse);
+               CommunicationClient.SendData(sensor.Configuration.Suffix, json);
            });
         }
 
@@ -84,12 +91,27 @@ namespace IOT_mock.IotDevices.Impl
         {
             CommunicationClient.Connect();
             StartAllSenors();
+            CommunicationClient.OnSettingsChange = settings => {
+                ChangeSettingsForSensor(Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3g7bd"), settings);
+            };
         }
 
         public void StopDevice()
         {
             StopAllSensors();
             CommunicationClient.Disconnect();
+        }
+
+        public void ChangeSettingsForSensor(Guid id, SettingsChange settings)
+        {
+            var sensor = Sensors.FirstOrDefault(s => s.Configuration.Id == id);
+            if (sensor is null)
+            {
+                return;
+            }
+            StopSensors(id);
+            sensor.Configuration.RecordInterval = settings.IntervalChange;
+            StartSenors(id);
         }
     }
 

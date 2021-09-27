@@ -33,7 +33,7 @@ namespace IOT_mock
             {
                 Configuration = new SensorConfiguration
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3g7bd"),
                     RecordInterval = 5000,
                     Suffix = "temp"
                 }

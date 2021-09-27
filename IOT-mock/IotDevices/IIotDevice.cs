@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using IOT_mock.Connector;
+using IOT_mock.Connector.Models;
 using IOT_mock.Sensors;
 using IOT_mock.Sensors.Models;
 
@@ -18,7 +19,7 @@ namespace IOT_mock.IotDevices
         void StartSenors(Guid id);
         void StopAllSensors();
         void StopSensors(Guid id);
-
+        void ChangeSettingsForSensor(Guid id, SettingsChange settings);
         void StartDevice();
         
         void StopDevice();
