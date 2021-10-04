@@ -92,7 +92,7 @@ namespace IOT_mock.IotDevices.Impl
             CommunicationClient.Connect();
             StartAllSenors();
             CommunicationClient.OnSettingsChange = settings => {
-                ChangeSettingsForSensor(Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3g7bd"), settings);
+                ChangeSettingsForSensor(Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3f7bd"), settings);
             };
         }
 
@@ -109,9 +109,7 @@ namespace IOT_mock.IotDevices.Impl
             {
                 return;
             }
-            StopSensors(id);
             sensor.Configuration.RecordInterval = settings.IntervalChange;
-            StartSenors(id);
         }
     }
 }

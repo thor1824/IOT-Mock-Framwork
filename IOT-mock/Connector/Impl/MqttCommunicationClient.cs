@@ -1,8 +1,10 @@
-﻿using System.Security.Authentication;
+﻿using System;
+using System.Security.Authentication;
 using IOT_mock.Connector.Models;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
+using MQTTnet.Client.Subscribing;
 using Newtonsoft.Json;
 
 namespace IOT_mock.Connector
@@ -32,26 +34,31 @@ namespace IOT_mock.Connector
                 .WithCleanSession()
                 .Build();
 
+            _client.ConnectAsync(_options).Wait();
+            _client.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
+                    .WithTopicFilter($"{Config.IotId}/settings-change")
+                    .Build()
+            ).Wait();
+
             _client.UseApplicationMessageReceivedHandler(e =>
             {
-                
+                Console.WriteLine("Got message");
                 string topic = e.ApplicationMessage.Topic;
 
-                if (topic.Contains("settings-change")) 
+                if (topic.Contains($"{Config.IotId}/settings-change"))
                 {
-                    if (OnSettingsChange is null) 
+                    Console.WriteLine("Message is to this IOT Device");
+                    if (OnSettingsChange is null)
                     {
                         return;
                     }
                     var rawData = e.ApplicationMessage.Payload;
                     var rawDataString = System.Text.Encoding.UTF8.GetString(rawData);
-                    var data = JsonConvert.DeserializeObject<SettingsChange>(rawDataString);
-                    OnSettingsChange.Invoke(data);
+                    var data = JsonConvert.DeserializeObject<SettingsTopicMessage>(rawDataString);
+                    OnSettingsChange.Invoke(data.Data);
                 }
-                
-            });
 
-            _client.ConnectAsync(_options).Wait();
+            });
             /*
              _client.UseConnectedHandler(e =>
                 {

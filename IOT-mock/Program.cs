@@ -26,6 +26,7 @@ namespace IOT_mock
                         Username = SecretConfig.Username,
                         ClientId = $"SmartCup-{deviceId}",
                         HostName = SecretConfig.Hostname,
+                        IotId = deviceId,
                         Port = SecretConfig.Port
                     }
                 }
@@ -34,7 +35,7 @@ namespace IOT_mock
             {
                 Configuration = new SensorConfiguration
                 {
-                    Id = Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3g7bd"),
+                    Id = Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3f7bd"),
                     RecordInterval = 5000,
                     Suffix = "temp"
                 }
