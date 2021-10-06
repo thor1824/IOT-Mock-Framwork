@@ -19,7 +19,8 @@ namespace IOT_mock.IotDevices
         void StartSenors(Guid id);
         void StopAllSensors();
         void StopSensors(Guid id);
-        void ChangeSettingsForSensor(Guid id, SettingsChange settings);
+        void ChangeSettingsForSensor(Guid id, SensorSetting settings);
+        void SendSettingsConfigs();
         void StartDevice();
         
         void StopDevice();

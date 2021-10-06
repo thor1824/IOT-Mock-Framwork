@@ -91,8 +91,12 @@ namespace IOT_mock.IotDevices.Impl
         {
             CommunicationClient.Connect();
             StartAllSenors();
+            SendSettingsConfigs();
             CommunicationClient.OnSettingsChange = settings => {
-                ChangeSettingsForSensor(Guid.Parse("b6cd3113-4314-519d-c98c-c88b2ef3f7bd"), settings);
+                foreach(var setting in settings.SensorSettings)
+                {
+                    ChangeSettingsForSensor(Guid.Parse(setting.SensorId), setting);
+                }
             };
         }
 
@@ -102,14 +106,31 @@ namespace IOT_mock.IotDevices.Impl
             CommunicationClient.Disconnect();
         }
 
-        public void ChangeSettingsForSensor(Guid id, SettingsChange settings)
+        public void ChangeSettingsForSensor(Guid id, SensorSetting settings)
         {
             var sensor = Sensors.FirstOrDefault(s => s.Configuration.Id == id);
             if (sensor is null)
             {
                 return;
             }
-            sensor.Configuration.RecordInterval = settings.IntervalChange;
+            sensor.Configuration.RecordInterval = settings.Interval;
+        }
+
+        public void SendSettingsConfigs()
+        {
+            var configResponse = new ConfigResponse(Id);
+            foreach (var sensor in Sensors)
+            {
+                var config = sensor.Configuration;
+                configResponse.SensorConfigs.Add(
+                    new SensorSettingResponse() 
+                    { 
+                        SensorId = config.Id, 
+                        Interval = config.RecordInterval 
+                    });
+            }
+            var json = JsonSerializer.Serialize(configResponse);
+            CommunicationClient.SendData($"{CommunicationClient.Config.Prefix}/settings", json);
         }
     }
 }
