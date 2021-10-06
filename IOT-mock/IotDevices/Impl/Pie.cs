@@ -93,7 +93,7 @@ namespace IOT_mock.IotDevices.Impl
             StartAllSenors();
             SendSettingsConfigs();
             CommunicationClient.OnSettingsChange = settings => {
-                foreach(var setting in settings.SensorSettings)
+                foreach(var setting in settings.SensorConfigs)
                 {
                     ChangeSettingsForSensor(Guid.Parse(setting.SensorId), setting);
                 }
@@ -130,7 +130,7 @@ namespace IOT_mock.IotDevices.Impl
                     });
             }
             var json = JsonSerializer.Serialize(configResponse);
-            CommunicationClient.SendData($"{CommunicationClient.Config.Prefix}/settings", json);
+            CommunicationClient.SendData($"settings", json);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace IOT_mock.Sensors.Impl
                     MeasurementUnit = "temp/c",
                     TimeStamp = DateTime.UtcNow
                 });
+                Console.WriteLine(Configuration.RecordInterval);
                 Thread.Sleep(Configuration.RecordInterval);
             }
         }

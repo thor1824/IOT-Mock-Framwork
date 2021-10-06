@@ -9,7 +9,7 @@ namespace IOT_mock.Connector.Models
     public class SettingsChange
     {
         public string IotId { get; set; }
-        public List<SensorSetting> SensorSettings { get; set; }
+        public List<SensorSetting> SensorConfigs { get; set; }
     }
 
     public class SensorSetting
